@@ -22,6 +22,12 @@ body {
 body.theme-dark {
   background: #0B0D11;
   color: #E8E0D0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.light-theme {
+  background: #FFFFFF;
+  color: #1A1A1A;
 }
 
 body.theme-light {
