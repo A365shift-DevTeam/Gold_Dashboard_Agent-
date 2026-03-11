@@ -1,7 +1,8 @@
-import { GOLD, GOLD_DARK, BG, SURFACE, SURFACE2, BORDER, TEXT, TEXT_DIM, fmtAED } from './constants';
+import { GOLD, GOLD_DARK, BG, SURFACE, SURFACE2, BORDER, TEXT, TEXT_DIM, fmtAED, getThemeColors } from './constants';
 
 // ─── DETAIL MODAL (Premium Full-Screen Overlay) ─────────────────────────────
-export function DetailModal({ title, subtitle, onClose, children }) {
+export function DetailModal({ title, subtitle, onClose, children, themeColors }) {
+  const colors = themeColors || getThemeColors(false);
   return (
     <div
       onClick={onClose}
@@ -15,7 +16,7 @@ export function DetailModal({ title, subtitle, onClose, children }) {
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: BG, border: `1px solid ${BORDER}`,
+          background: colors.BG, border: `1px solid ${colors.BORDER}`,
           borderRadius: 16, width: "90vw", maxWidth: 1200,
           maxHeight: "85vh", display: "flex", flexDirection: "column",
           boxShadow: `0 32px 64px rgba(0,0,0,0.6), 0 0 0 1px ${GOLD_DARK}33`,
@@ -24,25 +25,25 @@ export function DetailModal({ title, subtitle, onClose, children }) {
       >
         {/* Modal Header */}
         <div style={{
-          padding: "20px 28px", borderBottom: `1px solid ${BORDER}`,
+          padding: "20px 28px", borderBottom: `1px solid ${colors.BORDER}`,
           display: "flex", justifyContent: "space-between", alignItems: "center",
-          background: SURFACE, borderRadius: "16px 16px 0 0", flexShrink: 0,
+          background: colors.SURFACE, borderRadius: "16px 16px 0 0", flexShrink: 0,
         }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 3, height: 20, background: `linear-gradient(180deg,${GOLD},${GOLD_DARK})`, borderRadius: 2 }} />
               <span style={{ color: GOLD, fontSize: 18, fontWeight: 700, fontFamily: "'Playfair Display',serif" }}>{title}</span>
             </div>
-            {subtitle && <div style={{ color: TEXT_DIM, fontSize: 11, fontFamily: "'DM Mono',monospace", marginTop: 4, paddingLeft: 13 }}>{subtitle}</div>}
+            {subtitle && <div style={{ color: colors.TEXT_DIM, fontSize: 11, fontFamily: "'DM Mono',monospace", marginTop: 4, paddingLeft: 13 }}>{subtitle}</div>}
           </div>
           <button onClick={onClose} style={{
-            background: SURFACE2, border: `1px solid ${BORDER}`, color: TEXT_DIM,
+            background: colors.SURFACE2, border: `1px solid ${colors.BORDER}`, color: colors.TEXT_DIM,
             borderRadius: 8, padding: "8px 16px", cursor: "pointer", fontSize: 12,
             display: "flex", alignItems: "center", gap: 6,
             transition: "all 0.15s",
           }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; e.currentTarget.style.color = GOLD; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = TEXT_DIM; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = colors.BORDER; e.currentTarget.style.color = colors.TEXT_DIM; }}
           >
             <span style={{ fontSize: 9, fontFamily: "'DM Mono',monospace", opacity: 0.5 }}>ESC</span> ✕ Close
           </button>
@@ -58,12 +59,18 @@ export function DetailModal({ title, subtitle, onClose, children }) {
 
 
 // ─── KPI CARD ────────────────────────────────────────────────────────────────
-export function KPICard({ label, value, sub, delta, icon, highlight, pulse }) {
+export function KPICard({ label, value, sub, delta, icon, highlight, pulse, themeColors }) {
+  const colors = themeColors || getThemeColors(false);
+  const isLight = colors.BG === "#FFFFFF";
   const up = delta > 0;
   return (
     <div style={{
-      background: highlight ? `linear-gradient(135deg, #1A1505 0%, #2A2008 100%)` : SURFACE,
-      border: `1px solid ${highlight ? GOLD_DARK : BORDER}`,
+      background: highlight 
+        ? (isLight 
+          ? `linear-gradient(135deg, ${colors.SURFACE2} 0%, ${colors.SURFACE} 100%)` 
+          : `linear-gradient(135deg, #1A1505 0%, #2A2008 100%)`)
+        : colors.SURFACE,
+      border: `1px solid ${highlight ? GOLD_DARK : colors.BORDER}`,
       borderRadius: 12, padding: "20px 22px", flex: 1, minWidth: 160,
       position: "relative", overflow: "hidden",
       transition: "all 0.4s ease",
@@ -74,13 +81,13 @@ export function KPICard({ label, value, sub, delta, icon, highlight, pulse }) {
         background: `linear-gradient(90deg, ${GOLD_DARK}, ${GOLD})`,
       }} />}
       <div style={{ fontSize: 22, marginBottom: 6 }}>{icon}</div>
-      <div style={{ color: TEXT_DIM, fontSize: 11, fontFamily: "'DM Mono',monospace", letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>{label}</div>
+      <div style={{ color: colors.TEXT_DIM, fontSize: 11, fontFamily: "'DM Mono',monospace", letterSpacing: "0.08em", marginBottom: 6, textTransform: "uppercase" }}>{label}</div>
       <div style={{
-        color: highlight ? GOLD : TEXT, fontSize: 26, fontWeight: 700,
+        color: highlight ? GOLD : colors.TEXT, fontSize: 26, fontWeight: 700,
         fontFamily: "'Playfair Display',serif", letterSpacing: "-0.02em",
         transition: "color 0.3s",
       }}>{value}</div>
-      {sub && <div style={{ color: TEXT_DIM, fontSize: 11, marginTop: 4 }}>{sub}</div>}
+      {sub && <div style={{ color: colors.TEXT_DIM, fontSize: 11, marginTop: 4 }}>{sub}</div>}
       {delta !== undefined && (
         <div style={{ color: up ? "#4ECDC4" : "#FF6B6B", fontSize: 11, marginTop: 6, fontFamily: "'DM Mono',monospace" }}>
           {up ? "▲" : "▼"} {Math.abs(delta)}% vs yesterday
@@ -91,12 +98,13 @@ export function KPICard({ label, value, sub, delta, icon, highlight, pulse }) {
 }
 
 // ─── SECTION HEADER ──────────────────────────────────────────────────────────
-export function SectionHeader({ children, action, onAction }) {
+export function SectionHeader({ children, action, onAction, themeColors }) {
+  const colors = themeColors || getThemeColors(false);
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div style={{ width: 3, height: 18, background: `linear-gradient(180deg,${GOLD},${GOLD_DARK})`, borderRadius: 2 }} />
-        <span style={{ color: TEXT, fontSize: 14, fontWeight: 600, fontFamily: "'Playfair Display',serif", letterSpacing: "0.01em" }}>{children}</span>
+        <span style={{ color: colors.TEXT, fontSize: 14, fontWeight: 600, fontFamily: "'Playfair Display',serif", letterSpacing: "0.01em" }}>{children}</span>
       </div>
       {action && <span onClick={onAction} style={{ color: GOLD, fontSize: 11, cursor: "pointer", fontFamily: "'DM Mono',monospace" }}>{action}</span>}
     </div>
@@ -104,13 +112,14 @@ export function SectionHeader({ children, action, onAction }) {
 }
 
 // ─── NOTIFICATION PANE ───────────────────────────────────────────────────────
-export function NotificationPane({ notifications, summary, criticalCount, onDismiss, filter, setFilter, lastUpdated }) {
+export function NotificationPane({ notifications, summary, criticalCount, onDismiss, filter, setFilter, lastUpdated, themeColors }) {
+  const colors = themeColors || getThemeColors(false);
   const FILTERS = ["all", "critical", "warning", "info", "success"];
-  const FILTER_COLORS = { all: TEXT_DIM, critical: "#FF4444", warning: "#F5A623", info: "#4A9EFF", success: "#4ECDC4" };
+  const FILTER_COLORS = { all: colors.TEXT_DIM, critical: "#FF4444", warning: "#F5A623", info: "#4A9EFF", success: "#4ECDC4" };
   const filtered = filter === "all" ? notifications : notifications.filter(n => n.type === filter);
   return (
-    <div style={{ width: 320, background: SURFACE, borderLeft: `1px solid ${BORDER}`, display: "flex", flexDirection: "column", height: "100%", flexShrink: 0 }}>
-      <div style={{ padding: "18px 20px", borderBottom: `1px solid ${BORDER}`, background: SURFACE2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div style={{ width: 320, background: colors.SURFACE, borderLeft: `1px solid ${colors.BORDER}`, display: "flex", flexDirection: "column", height: "100%", flexShrink: 0 }}>
+      <div style={{ padding: "18px 20px", borderBottom: `1px solid ${colors.BORDER}`, background: colors.SURFACE2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ color: GOLD, fontSize: 13, fontWeight: 700, fontFamily: "'Playfair Display',serif" }}>Intelligence Centre</div>
@@ -120,7 +129,7 @@ export function NotificationPane({ notifications, summary, criticalCount, onDism
               animation: "pulse 2s infinite",
             }} />
           </div>
-          <div style={{ color: TEXT_DIM, fontSize: 10, fontFamily: "'DM Mono',monospace", marginTop: 2 }}>
+          <div style={{ color: colors.TEXT_DIM, fontSize: 10, fontFamily: "'DM Mono',monospace", marginTop: 2 }}>
             LIVE AI-POWERED ALERTS
             {lastUpdated && <span style={{ marginLeft: 8, color: "#4ECDC4" }}>· Updated {lastUpdated}</span>}
           </div>
@@ -128,9 +137,9 @@ export function NotificationPane({ notifications, summary, criticalCount, onDism
         {criticalCount > 0 && <div style={{ background: "#FF4444", color: "#fff", borderRadius: 10, fontSize: 10, padding: "2px 8px", fontWeight: 700, fontFamily: "'DM Mono',monospace", animation: "pulse 1.5s infinite" }}>{criticalCount} CRITICAL</div>}
       </div>
 
-      <div style={{ margin: 14, background: "#0D1018", border: `1px solid ${GOLD_DARK}`, borderRadius: 10, padding: 14 }}>
+      <div style={{ margin: 14, background: colors.BG === "#FFFFFF" ? colors.SURFACE2 : "#0D1018", border: `1px solid ${GOLD_DARK}`, borderRadius: 10, padding: 14 }}>
         <div style={{ color: GOLD, fontSize: 10, fontFamily: "'DM Mono',monospace", marginBottom: 8, letterSpacing: "0.08em" }}>✦ AI EXECUTIVE SUMMARY</div>
-        <div style={{ color: TEXT, fontSize: 11, lineHeight: 1.7 }}>{summary}</div>
+        <div style={{ color: colors.TEXT, fontSize: 11, lineHeight: 1.7 }}>{summary}</div>
       </div>
 
       {/* Filter Buttons */}
@@ -138,8 +147,8 @@ export function NotificationPane({ notifications, summary, criticalCount, onDism
         {FILTERS.map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{
             background: filter === f ? `${FILTER_COLORS[f]}22` : "transparent",
-            border: `1px solid ${filter === f ? FILTER_COLORS[f] : BORDER}`,
-            color: filter === f ? FILTER_COLORS[f] : TEXT_DIM,
+            border: `1px solid ${filter === f ? FILTER_COLORS[f] : colors.BORDER}`,
+            color: filter === f ? FILTER_COLORS[f] : colors.TEXT_DIM,
             borderRadius: 5, padding: "3px 8px", cursor: "pointer", fontSize: 9,
             fontFamily: "'DM Mono',monospace", textTransform: "uppercase", transition: "all 0.15s",
           }}>{f} {f !== "all" && `(${notifications.filter(n => n.type === f).length})`}</button>
@@ -147,21 +156,21 @@ export function NotificationPane({ notifications, summary, criticalCount, onDism
       </div>
 
       <div className="notif-scroll" style={{ flex: 1, padding: "0 14px 14px" }}>
-        {filtered.length === 0 && <div style={{ color: TEXT_DIM, fontSize: 11, textAlign: "center", padding: 20 }}>No {filter} alerts</div>}
+        {filtered.length === 0 && <div style={{ color: colors.TEXT_DIM, fontSize: 11, textAlign: "center", padding: 20 }}>No {filter} alerts</div>}
         {filtered.map(n => (
           <div key={n.id} style={{
-            background: SURFACE2, border: `1px solid ${BORDER}`,
+            background: colors.SURFACE2, border: `1px solid ${colors.BORDER}`,
             borderLeft: `3px solid ${n.type === "critical" ? "#FF4444" : n.type === "warning" ? "#F5A623" : n.type === "success" ? "#4ECDC4" : "#4A9EFF"}`,
             borderRadius: 8, padding: "12px 14px", marginBottom: 10, transition: "all 0.3s ease",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-              <div style={{ color: TEXT, fontSize: 12, fontWeight: 600 }}>{n.icon} {n.title}</div>
+              <div style={{ color: colors.TEXT, fontSize: 12, fontWeight: 600 }}>{n.icon} {n.title}</div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <div style={{ color: TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace" }}>{n.time}</div>
-                <button onClick={() => onDismiss(n.id)} style={{ background: "transparent", border: "none", color: TEXT_DIM, cursor: "pointer", fontSize: 10, padding: 0, lineHeight: 1 }} title="Dismiss">✕</button>
+                <div style={{ color: colors.TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace" }}>{n.time}</div>
+                <button onClick={() => onDismiss(n.id)} style={{ background: "transparent", border: "none", color: colors.TEXT_DIM, cursor: "pointer", fontSize: 10, padding: 0, lineHeight: 1 }} title="Dismiss">✕</button>
               </div>
             </div>
-            <div style={{ color: TEXT_DIM, fontSize: 11, lineHeight: 1.6 }}>{n.msg}</div>
+            <div style={{ color: colors.TEXT_DIM, fontSize: 11, lineHeight: 1.6 }}>{n.msg}</div>
             {n.action && <button style={{
               marginTop: 8, background: `${n.type === "critical" ? "#FF4444" : n.type === "warning" ? "#F5A623" : n.type === "success" ? "#4ECDC4" : "#4A9EFF"}18`,
               border: `1px solid ${n.type === "critical" ? "#FF4444" : n.type === "warning" ? "#F5A623" : n.type === "success" ? "#4ECDC4" : "#4A9EFF"}44`,
@@ -176,14 +185,15 @@ export function NotificationPane({ notifications, summary, criticalCount, onDism
 }
 
 // ─── BRANCH TABLE ────────────────────────────────────────────────────────────
-export function BranchTable({ data, onSelect, selected }) {
+export function BranchTable({ data, onSelect, selected, themeColors }) {
+  const colors = themeColors || getThemeColors(false);
   return (
     <div style={{ overflowX: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
         <thead>
-          <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+          <tr style={{ borderBottom: `1px solid ${colors.BORDER}` }}>
             {["Branch", "24K Sales", "18K Sales", "Grams Sold", "Txns", "Avg Order", "Stock Status", ""].map(h => (
-              <th key={h} style={{ padding: "10px 12px", color: TEXT_DIM, fontFamily: "'DM Mono',monospace", fontSize: 10, textAlign: "left", fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase" }}>{h}</th>
+              <th key={h} style={{ padding: "10px 12px", color: colors.TEXT_DIM, fontFamily: "'DM Mono',monospace", fontSize: 10, textAlign: "left", fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase" }}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -196,19 +206,19 @@ export function BranchTable({ data, onSelect, selected }) {
               <tr key={b.id}
                 onClick={() => onSelect(isSelected ? null : b.id)}
                 style={{
-                  borderBottom: `1px solid ${BORDER}`, cursor: "pointer",
-                  background: isSelected ? "#1A1505" : "transparent",
+                  borderBottom: `1px solid ${colors.BORDER}`, cursor: "pointer",
+                  background: isSelected ? (colors.BG === "#FFFFFF" ? colors.SURFACE2 : "#1A1505") : "transparent",
                   transition: "background 0.15s",
                 }}
-                onMouseEnter={e => !isSelected && (e.currentTarget.style.background = SURFACE2)}
+                onMouseEnter={e => !isSelected && (e.currentTarget.style.background = colors.SURFACE2)}
                 onMouseLeave={e => !isSelected && (e.currentTarget.style.background = "transparent")}
               >
-                <td style={{ padding: "11px 12px", color: isSelected ? GOLD : TEXT, fontWeight: isSelected ? 600 : 400 }}>{b.name}</td>
+                <td style={{ padding: "11px 12px", color: isSelected ? GOLD : colors.TEXT, fontWeight: isSelected ? 600 : 400 }}>{b.name}</td>
                 <td style={{ padding: "11px 12px", color: GOLD, fontFamily: "'DM Mono',monospace" }}>{fmtAED(b.sales24K)}</td>
                 <td style={{ padding: "11px 12px", color: "#8B6914", fontFamily: "'DM Mono',monospace" }}>{fmtAED(b.sales18K)}</td>
-                <td style={{ padding: "11px 12px", color: TEXT, fontFamily: "'DM Mono',monospace" }}>{(b.grams24K + b.grams18K).toLocaleString()}g</td>
-                <td style={{ padding: "11px 12px", color: TEXT }}>{b.transactions}</td>
-                <td style={{ padding: "11px 12px", color: TEXT, fontFamily: "'DM Mono',monospace" }}>{fmtAED(b.avgOrderValue)}</td>
+                <td style={{ padding: "11px 12px", color: colors.TEXT, fontFamily: "'DM Mono',monospace" }}>{(b.grams24K + b.grams18K).toLocaleString()}g</td>
+                <td style={{ padding: "11px 12px", color: colors.TEXT }}>{b.transactions}</td>
+                <td style={{ padding: "11px 12px", color: colors.TEXT, fontFamily: "'DM Mono',monospace" }}>{fmtAED(b.avgOrderValue)}</td>
                 <td style={{ padding: "11px 12px" }}>
                   {(isLow24K || isLow18K) ? (
                     <span style={{ color: "#FF4444", background: "rgba(255,68,68,0.12)", padding: "3px 8px", borderRadius: 6, fontSize: 10, fontFamily: "'DM Mono',monospace" }}>
@@ -229,47 +239,48 @@ export function BranchTable({ data, onSelect, selected }) {
 }
 
 // ─── BRANCH DETAIL ───────────────────────────────────────────────────────────
-export function BranchDetail({ branch, onClose }) {
+export function BranchDetail({ branch, onClose, themeColors }) {
+  const colors = themeColors || getThemeColors(false);
   return (
     <div style={{
-      background: SURFACE2, border: `1px solid ${GOLD_DARK}`,
+      background: colors.SURFACE2, border: `1px solid ${GOLD_DARK}`,
       borderRadius: 12, padding: 20, marginBottom: 20,
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
         <div>
           <div style={{ color: GOLD, fontSize: 16, fontWeight: 700, fontFamily: "'Playfair Display',serif" }}>{branch.name}</div>
-          <div style={{ color: TEXT_DIM, fontSize: 11, fontFamily: "'DM Mono',monospace", marginTop: 2 }}>BRANCH DRILL-DOWN</div>
+          <div style={{ color: colors.TEXT_DIM, fontSize: 11, fontFamily: "'DM Mono',monospace", marginTop: 2 }}>BRANCH DRILL-DOWN</div>
         </div>
-        <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${BORDER}`, color: TEXT_DIM, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 11 }}>✕ Close</button>
+        <button onClick={onClose} style={{ background: "transparent", border: `1px solid ${colors.BORDER}`, color: colors.TEXT_DIM, borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 11 }}>✕ Close</button>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}>
         {[
           { label: "24K Revenue", val: fmtAED(branch.sales24K), c: GOLD },
           { label: "18K Revenue", val: fmtAED(branch.sales18K), c: "#8B6914" },
-          { label: "Total Grams", val: `${branch.grams24K + branch.grams18K}g`, c: TEXT },
-          { label: "Transactions", val: branch.transactions, c: TEXT },
-          { label: "Avg Order", val: fmtAED(branch.avgOrderValue), c: TEXT },
+          { label: "Total Grams", val: `${branch.grams24K + branch.grams18K}g`, c: colors.TEXT },
+          { label: "Transactions", val: branch.transactions, c: colors.TEXT },
+          { label: "Avg Order", val: fmtAED(branch.avgOrderValue), c: colors.TEXT },
           { label: "24K Stock", val: `${branch.stock24K}g`, c: branch.stock24K < branch.reorderLevel24K ? "#FF4444" : "#4ECDC4" },
           { label: "18K Stock", val: `${branch.stock18K}g`, c: branch.stock18K < branch.reorderLevel18K ? "#FF4444" : "#4ECDC4" },
-          { label: "Avg Days to Sell", val: `${branch.inventoryAge}d`, c: TEXT },
+          { label: "Avg Days to Sell", val: `${branch.inventoryAge}d`, c: colors.TEXT },
         ].map(item => (
-          <div key={item.label} style={{ background: BG, borderRadius: 8, padding: "12px 14px", border: `1px solid ${BORDER}` }}>
-            <div style={{ color: TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace", letterSpacing: "0.06em", marginBottom: 4 }}>{item.label.toUpperCase()}</div>
+          <div key={item.label} style={{ background: colors.BG, borderRadius: 8, padding: "12px 14px", border: `1px solid ${colors.BORDER}` }}>
+            <div style={{ color: colors.TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace", letterSpacing: "0.06em", marginBottom: 4 }}>{item.label.toUpperCase()}</div>
             <div style={{ color: item.c, fontSize: 18, fontWeight: 700, fontFamily: "'Playfair Display',serif" }}>{item.val}</div>
           </div>
         ))}
       </div>
       <div style={{ display: "flex", gap: 12 }}>
-        <div style={{ flex: 1, background: BG, borderRadius: 8, padding: 12, border: `1px solid ${BORDER}` }}>
-          <div style={{ color: TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>FAST MOVING</div>
+        <div style={{ flex: 1, background: colors.BG, borderRadius: 8, padding: 12, border: `1px solid ${colors.BORDER}` }}>
+          <div style={{ color: colors.TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>FAST MOVING</div>
           <div style={{ color: "#4ECDC4", fontSize: 13, fontWeight: 600 }}>🚀 {branch.fastMoving}</div>
         </div>
-        <div style={{ flex: 1, background: BG, borderRadius: 8, padding: 12, border: `1px solid ${BORDER}` }}>
-          <div style={{ color: TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>SLOW MOVING</div>
+        <div style={{ flex: 1, background: colors.BG, borderRadius: 8, padding: 12, border: `1px solid ${colors.BORDER}` }}>
+          <div style={{ color: colors.TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>SLOW MOVING</div>
           <div style={{ color: "#F5A623", fontSize: 13, fontWeight: 600 }}>🐢 {branch.slowMoving}</div>
         </div>
-        <div style={{ flex: 1, background: BG, borderRadius: 8, padding: 12, border: `1px solid ${BORDER}` }}>
-          <div style={{ color: TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>STOCK STATUS</div>
+        <div style={{ flex: 1, background: colors.BG, borderRadius: 8, padding: 12, border: `1px solid ${colors.BORDER}` }}>
+          <div style={{ color: colors.TEXT_DIM, fontSize: 9, fontFamily: "'DM Mono',monospace", marginBottom: 6 }}>STOCK STATUS</div>
           <div style={{ fontSize: 13, fontWeight: 600, color: branch.stock24K < branch.reorderLevel24K || branch.stock18K < branch.reorderLevel18K ? "#FF4444" : "#4ECDC4" }}>
             {branch.stock24K < branch.reorderLevel24K || branch.stock18K < branch.reorderLevel18K ? "⚠️ Reorder Needed" : "✅ Healthy Stock"}
           </div>

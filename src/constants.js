@@ -2,6 +2,31 @@
 export const GOLD = "#C9A84C";
 export const GOLD_DARK = "#8B6914";
 export const GOLD_PALE = "#F5E9C8";
+
+// ─── THEME COLORS ────────────────────────────────────────────────────────────
+export const getThemeColors = (isLight = false) => {
+  if (isLight) {
+    return {
+      BG: "#FFFFFF",
+      SURFACE: "#F8F9FA",
+      SURFACE2: "#F0F2F5",
+      BORDER: "#E1E4E8",
+      TEXT: "#1A1A1A",
+      TEXT_DIM: "#6B7280",
+    };
+  } else {
+    return {
+      BG: "#0B0D11",
+      SURFACE: "#13161D",
+      SURFACE2: "#1A1E28",
+      BORDER: "#2A2D3A",
+      TEXT: "#E8E0D0",
+      TEXT_DIM: "#8A8070",
+    };
+  }
+};
+
+// Default dark theme colors (for backward compatibility)
 export const BG = "#0B0D11";
 export const SURFACE = "#13161D";
 export const SURFACE2 = "#1A1E28";
