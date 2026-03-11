@@ -1,14 +1,3 @@
-// ─── DESIGN TOKENS ───────────────────────────────────────────────────────────
-export const GOLD = "#C9A84C";
-export const GOLD_DARK = "#8B6914";
-export const GOLD_PALE = "#F5E9C8";
-export const BG = "#0B0D11";
-export const SURFACE = "#13161D";
-export const SURFACE2 = "#1A1E28";
-export const BORDER = "#2A2D3A";
-export const TEXT = "#E8E0D0";
-export const TEXT_DIM = "#8A8070";
-
 // ─── DOMAIN CONSTANTS ────────────────────────────────────────────────────────
 export const BRANCHES = [
   "Dubai Mall", "Deira Gold Souk", "Gold & Diamond Park", "Mall of Emirates",

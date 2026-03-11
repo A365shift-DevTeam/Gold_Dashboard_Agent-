@@ -4,7 +4,8 @@ import {
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area
 } from "recharts";
 
-import { GOLD, GOLD_DARK, BG, SURFACE, SURFACE2, BORDER, TEXT, TEXT_DIM, BRANCHES, CATEGORIES, fmt, fmtAED } from './constants';
+import { BRANCHES, CATEGORIES, fmt, fmtAED } from './constants';
+import { useTheme } from './themeContext';
 import {
   generateBranchData, tickBranchData, generateHourlyData, generateDailyData,
   generateMonthlyData, generateTopItems, generateSlowItems, generateAIInsights,
@@ -14,6 +15,7 @@ import { KPICard, SectionHeader, NotificationPane, BranchTable, BranchDetail, De
 
 // ─── MAIN DASHBOARD ───────────────────────────────────────────────────────────
 export default function GoldDashboard() {
+  const { GOLD, GOLD_BRIGHT, GOLD_24K, GOLD_18K, GOLD_DARK, BG, SURFACE, SURFACE2, BORDER, TEXT, TEXT_DIM, DANGER, DANGER_BG, SUCCESS, WARNING, INFO, toggleTheme, themeName } = useTheme();
   // ── UI States ──
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedBranch, setSelectedBranch] = useState(null);
@@ -105,9 +107,9 @@ export default function GoldDashboard() {
 
   // ── Dynamic carat pie (computed from actual data) ──
   const caratShare = useMemo(() => [
-    { name: "24K", value: metrics.caratPct24K, color: GOLD },
-    { name: "18K", value: metrics.caratPct18K, color: GOLD_DARK },
-  ], [metrics.caratPct24K, metrics.caratPct18K]);
+    { name: "24K", value: metrics.caratPct24K, color: GOLD_24K },
+    { name: "18K", value: metrics.caratPct18K, color: GOLD_18K },
+  ], [metrics.caratPct24K, metrics.caratPct18K, GOLD_24K, GOLD_18K]);
 
   // ── Carat-filtered chart data ──
   const filteredHourlyData = useMemo(() => {
@@ -190,7 +192,7 @@ export default function GoldDashboard() {
         justifyContent: "space-between", height: 60, flexShrink: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{
+          <div className="gold-glow" style={{
             width: 36, height: 36, background: `linear-gradient(135deg,${GOLD_DARK},${GOLD})`,
             borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 18,
@@ -204,17 +206,28 @@ export default function GoldDashboard() {
         <div style={{ display: "flex", gap: 6 }}>
           {TABS.map(t => (
             <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
-              background: activeTab === t.id ? `linear-gradient(135deg,${GOLD_DARK},${GOLD})` : "transparent",
+              background: activeTab === t.id 
+                ? (themeName === "light" ? GOLD_BRIGHT : `linear-gradient(135deg,${GOLD_DARK},${GOLD})`) 
+                : "transparent",
               border: activeTab === t.id ? "none" : `1px solid ${BORDER}`,
-              color: activeTab === t.id ? "#000" : TEXT_DIM,
+              color: activeTab === t.id ? (themeName === "light" ? "#FFFFFF" : "#000000") : TEXT_DIM,
+              boxShadow: activeTab === t.id ? `0 0 15px ${GOLD_BRIGHT}A0` : "none",
               borderRadius: 7, padding: "6px 14px", cursor: "pointer",
               fontSize: 12, fontWeight: activeTab === t.id ? 700 : 400,
-              transition: "all 0.15s",
+              transition: "all 0.25s ease",
             }}>{t.label}</button>
           ))}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <button onClick={toggleTheme} style={{
+            background: "transparent", border: `1px solid ${BORDER}`, color: TEXT,
+            borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center",
+            justifyContent: "center", cursor: "pointer", transition: "all 0.2s",
+            fontSize: 16,
+          }} title="Toggle Theme">
+            {themeName === "dark" ? "☀️" : "🌙"}
+          </button>
           <div style={{ textAlign: "right" }}>
             <div style={{ color: TEXT, fontSize: 13, fontFamily: "'DM Mono',monospace" }}>
               {clock.toLocaleTimeString("en-AE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
@@ -339,8 +352,8 @@ export default function GoldDashboard() {
                       <XAxis dataKey={timeView === "monthly" ? "month" : "day"} stroke={TEXT_DIM} tick={{ fontSize: 9 }} />
                       <YAxis stroke={TEXT_DIM} tick={{ fontSize: 9 }} tickFormatter={v => fmt(v)} />
                       <Tooltip contentStyle={tooltipStyle} formatter={v => [fmtAED(v)]} />
-                      {(filterCarat === "All" || filterCarat === "24K") && <Bar dataKey="24K" fill={GOLD} radius={[3, 3, 0, 0]} />}
-                      {(filterCarat === "All" || filterCarat === "18K") && <Bar dataKey="18K" fill={GOLD_DARK} radius={[3, 3, 0, 0]} />}
+                      {(filterCarat === "All" || filterCarat === "24K") && <Bar dataKey="24K" fill={GOLD_24K} radius={[3, 3, 0, 0]} />}
+                      {(filterCarat === "All" || filterCarat === "18K") && <Bar dataKey="18K" fill={GOLD_18K} radius={[3, 3, 0, 0]} />}
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -381,7 +394,7 @@ export default function GoldDashboard() {
                     const pct = max > 0 ? (total / max) * 100 : 0;
                     return (
                       <div key={b.id} style={{
-                        background: SURFACE2, border: `1px solid ${BORDER}`,
+                        background: themeName === "dark" ? "#1A1505" : "#FFF9EB", border: `1px solid ${BORDER}`,
                         borderRadius: 10, padding: "14px 16px", minWidth: 140, flexShrink: 0, cursor: "pointer",
                         transition: "border-color 0.2s",
                       }} onClick={() => setSelectedBranch(selectedBranch === b.id ? null : b.id)}>
@@ -415,11 +428,11 @@ export default function GoldDashboard() {
                       {topItems.map((item, i) => (
                         <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
                           <td style={{ padding: "9px 10px", color: TEXT }}>{item.category}</td>
-                          <td style={{ padding: "9px 10px", color: item.carat === "24K" ? GOLD : GOLD_DARK, fontFamily: "'DM Mono',monospace" }}>{item.carat}</td>
+                          <td style={{ padding: "9px 10px", color: item.carat === "24K" ? GOLD_24K : GOLD_18K, fontFamily: "'DM Mono',monospace" }}>{item.carat}</td>
                           <td style={{ padding: "9px 10px", color: TEXT }}>{item.qty}</td>
                           <td style={{ padding: "9px 10px", color: GOLD, fontFamily: "'DM Mono',monospace" }}>{fmtAED(item.revenue)}</td>
                           <td style={{ padding: "9px 10px" }}>
-                            <span style={{ color: item.avgDaysToSell <= 3 ? "#4ECDC4" : item.avgDaysToSell <= 7 ? GOLD : "#F5A623", fontFamily: "'DM Mono',monospace" }}>{item.avgDaysToSell}d</span>
+                            <span style={{ color: item.avgDaysToSell <= 3 ? SUCCESS : item.avgDaysToSell <= 7 ? GOLD : WARNING, fontFamily: "'DM Mono',monospace" }}>{item.avgDaysToSell}d</span>
                           </td>
                         </tr>
                       ))}
@@ -445,9 +458,9 @@ export default function GoldDashboard() {
                       {slowItems.map((item, i) => (
                         <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
                           <td style={{ padding: "9px 10px", color: TEXT }}>{item.category}</td>
-                          <td style={{ padding: "9px 10px", color: item.carat === "24K" ? GOLD : GOLD_DARK, fontFamily: "'DM Mono',monospace" }}>{item.carat}</td>
+                          <td style={{ padding: "9px 10px", color: item.carat === "24K" ? GOLD_24K : GOLD_18K, fontFamily: "'DM Mono',monospace" }}>{item.carat}</td>
                           <td style={{ padding: "9px 10px" }}>
-                            <span style={{ color: "#FF6B6B", fontFamily: "'DM Mono',monospace" }}>{item.daysInStock}d</span>
+                            <span style={{ color: DANGER, fontFamily: "'DM Mono',monospace" }}>{item.daysInStock}d</span>
                           </td>
                           <td style={{ padding: "9px 10px", color: TEXT }}>{item.stock} pcs</td>
                           <td style={{ padding: "9px 10px", color: TEXT_DIM, fontSize: 10 }}>{item.branch.split(" ").slice(0, 2).join(" ")}</td>
@@ -466,7 +479,7 @@ export default function GoldDashboard() {
                 <div style={{ background: SURFACE, border: `1px solid ${GOLD_DARK}`, borderRadius: 12, padding: 20 }}>
                   <SectionHeader action={`${aiData.reorderSuggestions.length} items`}>🤖 AI Reorder Suggestions</SectionHeader>
                   {aiData.reorderSuggestions.length === 0 ? (
-                    <div style={{ color: "#4ECDC4", fontSize: 12, padding: 12, textAlign: "center" }}>✅ All branches stocked above reorder levels</div>
+                    <div style={{ color: SUCCESS, fontSize: 12, padding: 12, textAlign: "center" }}>✅ All branches stocked above reorder levels</div>
                   ) : (
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                       <thead><tr style={{ borderBottom: `1px solid ${BORDER}` }}>
@@ -478,11 +491,11 @@ export default function GoldDashboard() {
                         {aiData.reorderSuggestions.map((r, i) => (
                           <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
                             <td style={{ padding: "9px 10px", color: TEXT }}>{r.branch}</td>
-                            <td style={{ padding: "9px 10px", color: r.carat === "24K" ? GOLD : GOLD_DARK, fontFamily: "'DM Mono',monospace" }}>{r.carat}</td>
-                            <td style={{ padding: "9px 10px", color: "#FF6B6B", fontFamily: "'DM Mono',monospace" }}>{r.currentStock}g</td>
-                            <td style={{ padding: "9px 10px", color: "#4ECDC4", fontFamily: "'DM Mono',monospace", fontWeight: 600 }}>+{r.suggestedOrder}g</td>
+                            <td style={{ padding: "9px 10px", color: r.carat === "24K" ? GOLD_24K : GOLD_18K, fontFamily: "'DM Mono',monospace" }}>{r.carat}</td>
+                            <td style={{ padding: "9px 10px", color: DANGER, fontFamily: "'DM Mono',monospace" }}>{r.currentStock}g</td>
+                            <td style={{ padding: "9px 10px", color: SUCCESS, fontFamily: "'DM Mono',monospace", fontWeight: 600 }}>+{r.suggestedOrder}g</td>
                             <td style={{ padding: "9px 10px" }}>
-                              <span style={{ color: r.urgency === "HIGH" ? "#FF4444" : "#F5A623", background: r.urgency === "HIGH" ? "rgba(255,68,68,0.12)" : "rgba(245,166,35,0.12)", padding: "3px 8px", borderRadius: 6, fontSize: 9, fontFamily: "'DM Mono',monospace" }}>
+                              <span style={{ color: r.urgency === "HIGH" ? DANGER : WARNING, background: r.urgency === "HIGH" ? DANGER_BG : "rgba(245,166,35,0.12)", padding: "4px 10px", borderRadius: 6, fontSize: 9, fontFamily: "'DM Mono',monospace", letterSpacing: "0.05em", fontWeight: 600 }}>
                                 {r.urgency === "HIGH" ? "🔥 HIGH" : "⚡ MED"}
                               </span>
                             </td>
@@ -496,7 +509,7 @@ export default function GoldDashboard() {
                 <div style={{ background: SURFACE, border: `1px solid ${GOLD_DARK}`, borderRadius: 12, padding: 20 }}>
                   <SectionHeader action="AI-Optimized">🔄 Branch Transfer Opportunities</SectionHeader>
                   {aiData.transferOps.length === 0 ? (
-                    <div style={{ color: "#4ECDC4", fontSize: 12, padding: 12, textAlign: "center" }}>✅ No transfer opportunities detected</div>
+                    <div style={{ color: SUCCESS, fontSize: 12, padding: 12, textAlign: "center" }}>✅ No transfer opportunities detected</div>
                   ) : (
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                       <thead><tr style={{ borderBottom: `1px solid ${BORDER}` }}>
@@ -507,11 +520,11 @@ export default function GoldDashboard() {
                       <tbody>
                         {aiData.transferOps.map((t, i) => (
                           <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
-                            <td style={{ padding: "9px 10px", color: "#F5A623" }}>{t.from}</td>
-                            <td style={{ padding: "9px 10px", color: "#4ECDC4" }}>{t.to}</td>
-                            <td style={{ padding: "9px 10px", color: t.carat === "24K" ? GOLD : GOLD_DARK, fontFamily: "'DM Mono',monospace" }}>{t.carat}</td>
+                            <td style={{ padding: "9px 10px", color: WARNING }}>{t.from}</td>
+                            <td style={{ padding: "9px 10px", color: SUCCESS }}>{t.to}</td>
+                            <td style={{ padding: "9px 10px", color: t.carat === "24K" ? GOLD_24K : GOLD_18K, fontFamily: "'DM Mono',monospace" }}>{t.carat}</td>
                             <td style={{ padding: "9px 10px", color: TEXT, fontFamily: "'DM Mono',monospace" }}>{t.qty}g</td>
-                            <td style={{ padding: "9px 10px", color: "#4ECDC4", fontFamily: "'DM Mono',monospace", fontWeight: 600 }}>{t.savings}</td>
+                            <td style={{ padding: "9px 10px", color: SUCCESS, fontFamily: "'DM Mono',monospace", fontWeight: 600 }}>{t.savings}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -547,8 +560,8 @@ export default function GoldDashboard() {
                       <XAxis dataKey="month" stroke={TEXT_DIM} tick={{ fontSize: 10 }} />
                       <YAxis stroke={TEXT_DIM} tick={{ fontSize: 10 }} tickFormatter={v => fmt(v)} />
                       <Tooltip contentStyle={tooltipStyle} formatter={v => [fmtAED(v)]} />
-                      {(filterCarat === "All" || filterCarat === "24K") && <Bar dataKey="24K" fill={GOLD} radius={[3, 3, 0, 0]} name="24K Gold" />}
-                      {(filterCarat === "All" || filterCarat === "18K") && <Bar dataKey="18K" fill={GOLD_DARK} radius={[3, 3, 0, 0]} name="18K Gold" />}
+                      {(filterCarat === "All" || filterCarat === "24K") && <Bar dataKey="24K" fill={GOLD_24K} radius={[3, 3, 0, 0]} name="24K Gold" />}
+                      {(filterCarat === "All" || filterCarat === "18K") && <Bar dataKey="18K" fill={GOLD_18K} radius={[3, 3, 0, 0]} name="18K Gold" />}
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -560,8 +573,8 @@ export default function GoldDashboard() {
                       <XAxis type="number" stroke={TEXT_DIM} tick={{ fontSize: 9 }} tickFormatter={v => fmt(v)} />
                       <YAxis type="category" dataKey="shortName" stroke={TEXT_DIM} tick={{ fontSize: 9 }} width={80} />
                       <Tooltip contentStyle={tooltipStyle} formatter={v => [fmtAED(v)]} />
-                      {(filterCarat === "All" || filterCarat === "24K") && <Bar dataKey="sales24K" fill={GOLD} name="24K" stackId="a" />}
-                      {(filterCarat === "All" || filterCarat === "18K") && <Bar dataKey="sales18K" fill={GOLD_DARK} name="18K" stackId="a" radius={[0, 3, 3, 0]} />}
+                      {(filterCarat === "All" || filterCarat === "24K") && <Bar dataKey="sales24K" fill={GOLD_24K} name="24K" stackId="a" />}
+                      {(filterCarat === "All" || filterCarat === "18K") && <Bar dataKey="sales18K" fill={GOLD_18K} name="18K" stackId="a" radius={[0, 3, 3, 0]} />}
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -569,10 +582,10 @@ export default function GoldDashboard() {
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
                 {[
-                  { label: "24K Total Revenue", val: fmtAED(metrics.total24K), sub: branchCountLabel, c: GOLD },
-                  { label: "18K Total Revenue", val: fmtAED(metrics.total18K), sub: branchCountLabel, c: GOLD_DARK },
-                  { label: "24K Grams Sold", val: `${filteredBranches.reduce((s, b) => s + b.grams24K, 0).toLocaleString()}g`, sub: "This period", c: GOLD },
-                  { label: "18K Grams Sold", val: `${filteredBranches.reduce((s, b) => s + b.grams18K, 0).toLocaleString()}g`, sub: "This period", c: GOLD_DARK },
+                  { label: "24K Total Revenue", val: fmtAED(metrics.total24K), sub: branchCountLabel, c: GOLD_24K },
+                  { label: "18K Total Revenue", val: fmtAED(metrics.total18K), sub: branchCountLabel, c: GOLD_18K },
+                  { label: "24K Grams Sold", val: `${filteredBranches.reduce((s, b) => s + b.grams24K, 0).toLocaleString()}g`, sub: "This period", c: GOLD_24K },
+                  { label: "18K Grams Sold", val: `${filteredBranches.reduce((s, b) => s + b.grams18K, 0).toLocaleString()}g`, sub: "This period", c: GOLD_18K },
                 ].map(item => (
                   <div key={item.label} style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 20 }}>
                     <div style={{ color: TEXT_DIM, fontSize: 10, fontFamily: "'DM Mono',monospace", marginBottom: 8, letterSpacing: "0.06em" }}>{item.label.toUpperCase()}</div>
@@ -615,8 +628,8 @@ export default function GoldDashboard() {
                       <XAxis dataKey="day" stroke={TEXT_DIM} tick={{ fontSize: 10 }} />
                       <YAxis stroke={TEXT_DIM} tick={{ fontSize: 10 }} tickFormatter={v => fmt(v)} />
                       <Tooltip contentStyle={tooltipStyle} formatter={v => [fmtAED(v)]} />
-                      {(filterCarat === "All" || filterCarat === "24K") && <Bar dataKey="24K" fill={GOLD} radius={[3, 3, 0, 0]} />}
-                      {(filterCarat === "All" || filterCarat === "18K") && <Bar dataKey="18K" fill={GOLD_DARK} radius={[3, 3, 0, 0]} />}
+                      {(filterCarat === "All" || filterCarat === "24K") && <Bar dataKey="24K" fill={GOLD_24K} radius={[3, 3, 0, 0]} />}
+                      {(filterCarat === "All" || filterCarat === "18K") && <Bar dataKey="18K" fill={GOLD_18K} radius={[3, 3, 0, 0]} />}
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -628,9 +641,9 @@ export default function GoldDashboard() {
                       <XAxis dataKey="month" stroke={TEXT_DIM} tick={{ fontSize: 10 }} />
                       <YAxis stroke={TEXT_DIM} tick={{ fontSize: 10 }} tickFormatter={v => fmt(v)} />
                       <Tooltip contentStyle={tooltipStyle} formatter={v => [fmtAED(v)]} />
-                      {(filterCarat === "All" || filterCarat === "24K") && <Line type="monotone" dataKey="24K" stroke={GOLD} strokeWidth={2} dot={false} />}
-                      {(filterCarat === "All" || filterCarat === "18K") && <Line type="monotone" dataKey="18K" stroke={GOLD_DARK} strokeWidth={2} dot={false} />}
-                      <Line type="monotone" dataKey="target" stroke="#FF6B6B" strokeWidth={1.5} strokeDasharray="5 5" dot={false} name="Target" />
+                      {(filterCarat === "All" || filterCarat === "24K") && <Line type="monotone" dataKey="24K" stroke={GOLD_24K} strokeWidth={2} dot={false} />}
+                      {(filterCarat === "All" || filterCarat === "18K") && <Line type="monotone" dataKey="18K" stroke={GOLD_18K} strokeWidth={2} dot={false} />}
+                      <Line type="monotone" dataKey="target" stroke={DANGER} strokeWidth={1.5} strokeDasharray="5 5" dot={false} name="Target" />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -643,10 +656,10 @@ export default function GoldDashboard() {
             <>
               <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
                 {[
-                  { label: "Low Stock", count: filteredBranches.filter(b => b.stock24K < b.reorderLevel24K || b.stock18K < b.reorderLevel18K).length, c: "#FF4444" },
-                  { label: "Healthy Stock", count: filteredBranches.filter(b => b.stock24K >= b.reorderLevel24K && b.stock18K >= b.reorderLevel18K).length, c: "#4ECDC4" },
-                  { label: "Overstocked", count: filteredBranches.filter(b => b.stock24K > 600 || b.stock18K > 450).length, c: "#F5A623" },
-                  { label: "Aging > 30d", count: filteredBranches.filter(b => b.inventoryAge > 30).length, c: "#FF8C69" },
+                  { label: "Low Stock", count: filteredBranches.filter(b => b.stock24K < b.reorderLevel24K || b.stock18K < b.reorderLevel18K).length, c: DANGER },
+                  { label: "Healthy Stock", count: filteredBranches.filter(b => b.stock24K >= b.reorderLevel24K && b.stock18K >= b.reorderLevel18K).length, c: SUCCESS },
+                  { label: "Overstocked", count: filteredBranches.filter(b => b.stock24K > 600 || b.stock18K > 450).length, c: WARNING },
+                  { label: "Aging > 30d", count: filteredBranches.filter(b => b.inventoryAge > 30).length, c: DANGER },
                 ].map(s => (
                   <div key={s.label} style={{ flex: 1, background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "18px 20px" }}>
                     <div style={{ color: TEXT_DIM, fontSize: 10, fontFamily: "'DM Mono',monospace", marginBottom: 8 }}>{s.label.toUpperCase()}</div>
@@ -675,20 +688,20 @@ export default function GoldDashboard() {
                         return (
                           <tr key={b.id} style={{ borderBottom: `1px solid ${BORDER}` }}>
                             <td style={{ padding: "10px 12px", color: TEXT }}>{b.name}</td>
-                            <td style={{ padding: "10px 12px", color: isLow24K ? "#FF4444" : GOLD, fontFamily: "'DM Mono',monospace" }}>{b.stock24K}g</td>
+                            <td style={{ padding: "10px 12px", color: isLow24K ? DANGER : GOLD_24K, fontFamily: "'DM Mono',monospace", fontWeight: isLow24K ? 600 : 400 }}>{b.stock24K}g</td>
                             <td style={{ padding: "10px 12px", color: TEXT_DIM }}>{b.reorderLevel24K}g</td>
-                            <td style={{ padding: "10px 12px", color: isLow18K ? "#FF4444" : GOLD_DARK, fontFamily: "'DM Mono',monospace" }}>{b.stock18K}g</td>
+                            <td style={{ padding: "10px 12px", color: isLow18K ? DANGER : GOLD_18K, fontFamily: "'DM Mono',monospace", fontWeight: isLow18K ? 600 : 400 }}>{b.stock18K}g</td>
                             <td style={{ padding: "10px 12px", color: TEXT_DIM }}>{b.reorderLevel18K}g</td>
                             <td style={{ padding: "10px 12px" }}>
                               {isLow24K || isLow18K ? (
-                                <span style={{ color: "#FF4444", background: "rgba(255,68,68,0.12)", padding: "3px 8px", borderRadius: 6, fontSize: 9 }}>⚠ LOW</span>
+                                <span style={{ color: DANGER, background: "rgba(255,68,68,0.12)", padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 500 }}>⚠ LOW</span>
                               ) : isOver ? (
-                                <span style={{ color: "#F5A623", background: "rgba(245,166,35,0.12)", padding: "3px 8px", borderRadius: 6, fontSize: 9 }}>📦 OVER</span>
+                                <span style={{ color: WARNING, background: "rgba(245,166,35,0.12)", padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 500 }}>📦 OVER</span>
                               ) : (
-                                <span style={{ color: "#4ECDC4", background: "rgba(78,205,196,0.1)", padding: "3px 8px", borderRadius: 6, fontSize: 9 }}>✓ OK</span>
+                                <span style={{ color: SUCCESS, background: "rgba(78,205,196,0.1)", padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 500 }}>✓ OK</span>
                               )}
                             </td>
-                            <td style={{ padding: "10px 12px", color: b.inventoryAge > 30 ? "#FF8C69" : TEXT_DIM, fontFamily: "'DM Mono',monospace" }}>{b.inventoryAge}d</td>
+                            <td style={{ padding: "10px 12px", color: b.inventoryAge > 30 ? DANGER : TEXT_DIM, fontFamily: "'DM Mono',monospace", fontWeight: b.inventoryAge > 30 ? 600 : 400 }}>{b.inventoryAge}d</td>
                           </tr>
                         );
                       })}
@@ -723,12 +736,12 @@ export default function GoldDashboard() {
                       <div key={i} style={{ marginBottom: 12 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                           <span style={{ color: TEXT, fontSize: 12 }}>{item.category} ({item.carat})</span>
-                          <span style={{ color: item.avgDaysToSell <= 3 ? "#4ECDC4" : item.avgDaysToSell <= 7 ? GOLD : "#FF8C69", fontSize: 11, fontFamily: "'DM Mono',monospace" }}>{item.avgDaysToSell}d avg</span>
+                          <span style={{ color: item.avgDaysToSell <= 3 ? SUCCESS : item.avgDaysToSell <= 7 ? GOLD : DANGER, fontSize: 11, fontFamily: "'DM Mono',monospace" }}>{item.avgDaysToSell}d avg</span>
                         </div>
                         <div style={{ background: BORDER, borderRadius: 4, height: 5, overflow: "hidden" }}>
                           <div style={{
                             width: `${Math.min((item.avgDaysToSell / 12) * 100, 100)}%`,
-                            background: item.avgDaysToSell <= 3 ? "#4ECDC4" : item.avgDaysToSell <= 7 ? GOLD : "#FF8C69",
+                            background: item.avgDaysToSell <= 3 ? SUCCESS : item.avgDaysToSell <= 7 ? GOLD : DANGER,
                             height: "100%", borderRadius: 4, transition: "width 0.5s",
                           }} />
                         </div>
@@ -751,16 +764,16 @@ export default function GoldDashboard() {
                       {topItems.map((item, i) => (
                         <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
                           <td style={{ padding: "10px 12px", color: TEXT, fontWeight: 500 }}>{item.category}</td>
-                          <td style={{ padding: "10px 12px", color: item.carat === "24K" ? GOLD : GOLD_DARK, fontFamily: "'DM Mono',monospace" }}>{item.carat}</td>
+                          <td style={{ padding: "10px 12px", color: item.carat === "24K" ? GOLD_24K : GOLD_18K, fontFamily: "'DM Mono',monospace" }}>{item.carat}</td>
                           <td style={{ padding: "10px 12px", color: TEXT }}>{item.qty}</td>
                           <td style={{ padding: "10px 12px", color: TEXT, fontFamily: "'DM Mono',monospace" }}>{item.grams}g</td>
                           <td style={{ padding: "10px 12px", color: GOLD, fontFamily: "'DM Mono',monospace" }}>{fmtAED(item.revenue)}</td>
-                          <td style={{ padding: "10px 12px", fontFamily: "'DM Mono',monospace", color: item.avgDaysToSell <= 3 ? "#4ECDC4" : item.avgDaysToSell <= 7 ? GOLD : "#FF8C69" }}>{item.avgDaysToSell}d</td>
+                          <td style={{ padding: "10px 12px", fontFamily: "'DM Mono',monospace", color: item.avgDaysToSell <= 3 ? SUCCESS : item.avgDaysToSell <= 7 ? GOLD : DANGER, fontWeight: 500 }}>{item.avgDaysToSell}d</td>
                           <td style={{ padding: "10px 12px" }}>
                             <span style={{
-                              color: item.avgDaysToSell <= 3 ? "#4ECDC4" : item.avgDaysToSell <= 7 ? GOLD : "#FF8C69",
-                              background: item.avgDaysToSell <= 3 ? "rgba(78,205,196,0.1)" : item.avgDaysToSell <= 7 ? "rgba(201,168,76,0.1)" : "rgba(255,140,105,0.1)",
-                              padding: "3px 8px", borderRadius: 6, fontSize: 9, fontFamily: "'DM Mono',monospace",
+                              color: item.avgDaysToSell <= 3 ? SUCCESS : item.avgDaysToSell <= 7 ? GOLD : DANGER,
+                              background: item.avgDaysToSell <= 3 ? "rgba(43,152,144,0.12)" : item.avgDaysToSell <= 7 ? "rgba(201,168,76,0.1)" : "rgba(220,38,38,0.1)",
+                              padding: "4px 10px", borderRadius: 6, fontSize: 10, fontFamily: "'DM Mono',monospace", fontWeight: 600,
                             }}>
                               {item.avgDaysToSell <= 3 ? "🔥 HOT" : item.avgDaysToSell <= 7 ? "↗ MOVING" : "🐢 SLOW"}
                             </span>
@@ -818,18 +831,21 @@ export default function GoldDashboard() {
               const pct = max > 0 ? (total / max) * 100 : 0;
               const isLow = b.stock24K < b.reorderLevel24K || b.stock18K < b.reorderLevel18K;
               return (
-                <div key={b.id} style={{
-                  background: i < 3 ? '#1A1505' : SURFACE, border: `1px solid ${i < 3 ? GOLD_DARK : BORDER}`,
+                <div key={b.id} className={i < 3 ? "gold-glow" : ""} style={{
+                  background: i < 3 ? (themeName === "dark" ? "#1A1505" : "#FFF9EB") : SURFACE, border: `1px solid ${i < 3 ? GOLD_DARK : BORDER}`,
                   borderRadius: 10, padding: '16px 18px', position: 'relative', overflow: 'hidden',
                   transition: 'border-color 0.2s, transform 0.2s',
                 }}>
-                  {i < 3 && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${GOLD_DARK},${GOLD})` }} />}
+                  {i < 3 && <>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${GOLD_DARK},${GOLD})` }} />
+                    <div className="gold-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2 }} />
+                  </>}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <div style={{
                       color: i < 3 ? GOLD : TEXT_DIM, fontSize: 10, fontFamily: "'DM Mono',monospace",
                       background: i < 3 ? `${GOLD}15` : `${BORDER}88`, padding: '2px 8px', borderRadius: 4,
                     }}>#{i + 1}</div>
-                    {isLow && <span style={{ color: '#FF4444', fontSize: 9, fontFamily: "'DM Mono',monospace", background: 'rgba(255,68,68,0.12)', padding: '2px 6px', borderRadius: 4 }}>LOW STOCK</span>}
+                    {isLow && <span style={{ color: DANGER, fontSize: 9, fontFamily: "'DM Mono',monospace", background: DANGER_BG, padding: '2px 6px', borderRadius: 4 }}>LOW STOCK</span>}
                   </div>
                   <div style={{ color: TEXT, fontSize: 13, fontWeight: 600, marginBottom: 10, lineHeight: 1.3 }}>{b.name}</div>
                   <div style={{ background: BORDER, borderRadius: 4, height: 4, marginBottom: 10, overflow: 'hidden' }}>

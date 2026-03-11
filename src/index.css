@@ -17,14 +17,27 @@ body {
   font-family: 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body.theme-dark {
   background: #0B0D11;
   color: #E8E0D0;
 }
 
+body.theme-light {
+  background: #FAFAFA;
+  color: #111111;
+}
+
 /* Selection color */
-::selection {
+body.theme-dark ::selection {
   background: rgba(201, 168, 76, 0.3);
   color: #E8E0D0;
+}
+
+body.theme-light ::selection {
+  background: rgba(182, 139, 53, 0.3);
+  color: #111111;
 }
 
 /* ─── Premium Scrollbar ─── */
@@ -37,20 +50,36 @@ body {
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
+body.theme-dark ::-webkit-scrollbar-thumb {
   background: rgba(201, 168, 76, 0.2);
+}
+
+body.theme-light ::-webkit-scrollbar-thumb {
+  background: rgba(182, 139, 53, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
   border-radius: 10px;
   transition: background 0.3s;
 }
 
-::-webkit-scrollbar-thumb:hover {
+body.theme-dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(201, 168, 76, 0.45);
 }
 
+body.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(182, 139, 53, 0.45);
+}
+
 /* Firefox scrollbar */
-* {
+body.theme-dark * {
   scrollbar-width: thin;
   scrollbar-color: rgba(201, 168, 76, 0.2) transparent;
+}
+
+body.theme-light * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(182, 139, 53, 0.2) transparent;
 }
 
 /* ─── Smooth Scroll for all scroll containers ─── */
@@ -68,8 +97,15 @@ body {
   scroll-behavior: smooth;
 }
 
-.table-scroll::-webkit-scrollbar-track {
+body.theme-dark .table-scroll::-webkit-scrollbar-track,
+body.theme-dark .notif-scroll::-webkit-scrollbar-track {
   background: #13161D;
+  border-radius: 4px;
+}
+
+body.theme-light .table-scroll::-webkit-scrollbar-track,
+body.theme-light .notif-scroll::-webkit-scrollbar-track {
+  background: #F0F0F0;
   border-radius: 4px;
 }
 
@@ -77,10 +113,6 @@ body {
 .notif-scroll {
   overflow-y: auto;
   scroll-behavior: smooth;
-}
-
-.notif-scroll::-webkit-scrollbar-track {
-  background: #13161D;
 }
 
 /* Button reset */
@@ -118,4 +150,32 @@ select:focus {
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(24px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Gold Lighting Effects ─── */
+@keyframes goldGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(212,175,55,0.15), 0 0 20px rgba(212,175,55,0.05); }
+  50%      { box-shadow: 0 0 16px rgba(212,175,55,0.30), 0 0 40px rgba(212,175,55,0.10); }
+}
+
+@keyframes goldShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Apply to elements for a subtle pulsing gold glow */
+.gold-glow {
+  animation: goldGlow 3s ease-in-out infinite;
+}
+
+/* A gold shimmer sweep for premium accent bars */
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(212,175,55,0) 0%,
+    rgba(255,215,0,0.5) 50%,
+    rgba(212,175,55,0) 100%
+  );
+  background-size: 200% 100%;
+  animation: goldShimmer 3s ease-in-out infinite;
 }
